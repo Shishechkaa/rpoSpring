@@ -1,8 +1,11 @@
 package ru.iu3.rpospring.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table
@@ -14,6 +17,10 @@ public class Country {
 
     @Column(unique = true)
     String name;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "countryID")
+    public List<Artist> artists = new ArrayList<>();
 
     public Country() {
 

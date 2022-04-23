@@ -10,38 +10,41 @@ import javax.persistence.*;
 public class Artist {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @NonNull
-    Integer id;
+    @Column(nullable = false)
+    Long id;
 
-    @NonNull
+    @Column(unique = true, nullable = false)
     String name;
 
     @ManyToOne
-    @MapsId
+    @JoinColumn(name = "countryID")
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     Country countryID;
 
-    String age;
+    @Column(nullable = false)
+    String century;
 
     public Artist() {
 
     }
 
-    @NonNull
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(@NonNull Integer id) {
+    public Artist(Long id) {
         this.id = id;
     }
 
-    @NonNull
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
-    public void setName(@NonNull String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -53,11 +56,11 @@ public class Artist {
         this.countryID = countryID;
     }
 
-    public String getAge() {
-        return age;
+    public String getCentury() {
+        return century;
     }
 
-    public void setAge(String age) {
-        this.age = age;
+    public void setCentury(String century) {
+        this.century = century;
     }
 }

@@ -1,41 +1,58 @@
 package ru.iu3.rpospring.domain;
 
-import org.springframework.lang.NonNull;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table
 public class Museum {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @NonNull
-    Integer id;
+    @Column(nullable = false)
+    Long id;
 
-    @NonNull
+    @Column(updatable = false, unique = true, nullable = false)
     String name;
 
+    @Column(nullable = false)
     String location;
 
+    @JsonIgnore
+    @OneToMany
+    public List<Painting> paintings = new ArrayList<>();
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "museum_usr", joinColumns = @JoinColumn(name = "museumID"),
+            inverseJoinColumns = @JoinColumn(name = "usrID"))
+    public Set<Usr> usrs = new HashSet<>();
+
     public Museum() {
-
     }
 
-    @NonNull
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(@NonNull Integer id) {
+    public Museum(Long id) {
         this.id = id;
     }
 
-    @NonNull
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
-    public void setName(@NonNull String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
