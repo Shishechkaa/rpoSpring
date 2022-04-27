@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +29,7 @@ public class Usr {
 
     String token;
 
-    Date activity;
+    LocalDateTime activity;
 
     @ManyToMany(mappedBy = "usrs")
     public Set<Museum> museums = new HashSet<>();
@@ -95,11 +96,11 @@ public class Usr {
         this.token = token;
     }
 
-    public Date getActivity() {
+    public LocalDateTime getActivity() {
         return activity;
     }
 
-    public void setActivity(Date activity) {
+    public void setActivity(LocalDateTime activity) {
         this.activity = activity;
     }
 }
