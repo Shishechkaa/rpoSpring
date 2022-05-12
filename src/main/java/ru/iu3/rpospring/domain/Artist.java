@@ -1,7 +1,6 @@
 package ru.iu3.rpospring.domain;
 
 import org.hibernate.annotations.Cascade;
-import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 

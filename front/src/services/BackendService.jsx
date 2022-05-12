@@ -9,7 +9,7 @@ class BackendService {
         return axios.post(`${AUTH_URL}/login`, {login, password})
     }
     logout() {
-        return axios.get(`${AUTH_URL}/logout`, {Authorization : Utils.getToken()})
+        return axios.get(`${AUTH_URL}/logout`, { headers : {Authorization: Utils.getToken()}})
     }
 }
 
