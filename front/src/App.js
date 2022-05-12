@@ -5,6 +5,7 @@ import {createBrowserHistory} from "history";
 
 import NavigationBar from "./components/NavigationBarClass";
 import Home from "./components/Home";
+import Login from "./components/Login";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
               <div className="container-fluid">
                   <Routes>
                       <Route path="home" element={<Home/>}/>
+                      <Route path={"login"} element={<Login/>}/>
                   </Routes>
               </div>
           </BrowserRouter>
