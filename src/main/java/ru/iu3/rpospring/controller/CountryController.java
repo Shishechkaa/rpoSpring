@@ -1,17 +1,18 @@
 package ru.iu3.rpospring.controller;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.iu3.rpospring.domain.Artist;
 import ru.iu3.rpospring.domain.Country;
 import ru.iu3.rpospring.repo.ArtistRepo;
 import ru.iu3.rpospring.repo.CountryRepo;
+import ru.iu3.rpospring.tools.DataValidationException;
 
+import javax.validation.Valid;
 import java.util.*;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1")
 public class CountryController {
@@ -26,6 +27,14 @@ public class CountryController {
     @GetMapping("/countries")
     public List<Country> getAllCountries() {
         return countryRepo.findAll();
+    }
+
+    @GetMapping("/countries/{id}")
+    public ResponseEntity getCountry(@PathVariable(value = "id") Long countryId)
+        throws DataValidationException {
+        Country country = countryRepo.findById(countryId).
+                orElseThrow(()->new DataValidationException("Страна с таким индексом не найдена"));
+        return ResponseEntity.ok(country);
     }
 
     @GetMapping("/countries/{id}/artists")
@@ -60,21 +69,29 @@ public class CountryController {
     }
 
     @PutMapping("/countries/{id}")
-    public ResponseEntity<Country> updateCountry(
-            @PathVariable(value = "id") Long id,
-            @RequestBody Country country
-            ) {
-        Optional<Country> uc = countryRepo.findById(id);
-        if (uc.isPresent()) {
-            Country countryFromDB = uc.get();
-            BeanUtils.copyProperties(country, countryFromDB, "id");
-            countryRepo.save(countryFromDB);
-            return ResponseEntity.ok(countryFromDB);
-        } else {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "country not found");
+    public ResponseEntity<Country> updateCountry(@PathVariable(value = "id") Long countryId,
+                                                 @Valid @RequestBody Country countryDetails)
+            throws DataValidationException {
+        try {
+            Country country = countryRepo.findById(countryId)
+                    .orElseThrow(() -> new DataValidationException("Страна с таким индексом не найдена"));
+            country.setName(countryDetails.getName());
+            countryRepo.save(country);
+            return ResponseEntity.ok(country);
         }
+        catch (Exception ex) {
+            String error;
+            if (ex.getMessage().contains("countries.name_UNIQUE"))
+                throw new DataValidationException("Эта страна уже есть в базе");
+            else
+                throw new DataValidationException("Неизвестная ошибка");
+        }
+    }
 
+    @PostMapping("/deletecountries")
+    public ResponseEntity deleteCountries(@Valid @RequestBody List<Country> countries) {
+        countryRepo.deleteAll(countries);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @DeleteMapping("/countries/{id}")
