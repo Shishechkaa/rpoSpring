@@ -20,6 +20,9 @@ public class Usr {
     @JsonIgnore
     String password;
 
+    @Transient
+    public String np;
+
     @Column(nullable = false, unique = true)
     String email;
 

@@ -1,5 +1,8 @@
 package ru.iu3.rpospring.controller;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,8 +28,8 @@ public class CountryController {
     }
 
     @GetMapping("/countries")
-    public List<Country> getAllCountries() {
-        return countryRepo.findAll();
+    public Page<Country> getAllCountries(@RequestParam("page") int page, @RequestParam("limit") int limit) {
+        return countryRepo.findAll(PageRequest.of(page, limit, Sort.by(Sort.Direction.ASC, "name")));
     }
 
     @GetMapping("/countries/{id}")

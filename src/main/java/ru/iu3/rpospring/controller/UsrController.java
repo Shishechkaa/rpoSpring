@@ -9,10 +9,14 @@ import ru.iu3.rpospring.domain.Museum;
 import ru.iu3.rpospring.domain.Usr;
 import ru.iu3.rpospring.repo.MuseumRepo;
 import ru.iu3.rpospring.repo.UsrRepo;
+import ru.iu3.rpospring.tools.DataValidationException;
+import ru.iu3.rpospring.tools.Utils;
+import org.springframework.security.crypto.codec.Hex;
 
 import javax.validation.Valid;
 import java.util.*;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/v1/users")
 public class UsrController {
@@ -28,6 +32,15 @@ public class UsrController {
     @GetMapping
     public List<Usr> getAllUsers () {
         return usrRepo.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Usr> getUser(@PathVariable(value = "id") Long userId)
+            throws DataValidationException
+    {
+        Usr user = usrRepo.findById(userId)
+                .orElseThrow(()-> new DataValidationException("Пользователь с таким индексом не найдена"));
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping
@@ -92,19 +105,28 @@ public class UsrController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usr> updateUser(
-            @PathVariable(value = "id") Long userId,
-            @RequestBody Usr usrDetails) {
-
-        Optional<Usr> uu = usrRepo.findById(userId);
-        if (uu.isPresent()) {
-            Usr userFromDB = uu.get();
-            BeanUtils.copyProperties(usrDetails, userFromDB,
-                    "id", "token", "activity", "password", "salt");
-            usrRepo.save(userFromDB);
-            return ResponseEntity.ok(userFromDB);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
-        }
-    }
+    public ResponseEntity<Usr> updateUser(@PathVariable(value = "id") Long userId,
+                                          @Valid @RequestBody Usr userDetails) throws DataValidationException {
+                try {
+                    Usr user = usrRepo.findById(userId)
+                            .orElseThrow(() -> new DataValidationException("Пользователь с таким индексом не найден"));
+                    user.setEmail(userDetails.getEmail());
+                    String np = userDetails.np;
+                    if (np != null && !np.isEmpty()) {
+                        byte[] b = new byte[32];
+                        new Random().nextBytes(b);
+                        String salt = new String(Hex.encode(b));
+                        user.setPassword(Utils.ComputeHash(np, salt));
+                        user.setSalt(salt);
+                    }
+                    usrRepo.save(user);
+                    return ResponseEntity.ok(user);
+                } catch (Exception ex) {
+                    String error;
+                    if (ex.getMessage().contains("users.email_UNIQUE"))
+                        throw new DataValidationException("Пользователь с такой почтой уже есть в базе");
+                    else
+                        throw new DataValidationException("Неизвестная ошибка");
+                }
+            }
 }
